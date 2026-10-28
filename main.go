@@ -1,10 +1,10 @@
 package main
 
 import (
-	_ "github.com/lib/pq"
 	"chirpy/internal/database"
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
@@ -54,6 +54,8 @@ func main() {
 	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
 	mux.HandleFunc("POST /api/login", apiCfg.handlerLogin)
+	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefreshToken)
+	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevokeToken)
 
 	srv := &http.Server{
 		Addr:    ":" + port,

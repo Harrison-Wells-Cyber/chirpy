@@ -1,9 +1,30 @@
 package auth
 
 import (
+	"encoding/hex"
 	"net/http"
 	"testing"
 )
+
+func TestMakeRefreshToken(t *testing.T) {
+	t.Run("returns a 64-char hex string", func(t *testing.T) {
+		token := MakeRefreshToken()
+		if len(token) != 64 {
+			t.Fatalf("expected 64 hex chars (32 bytes), got %d", len(token))
+		}
+		if _, err := hex.DecodeString(token); err != nil {
+			t.Fatalf("expected a valid hex string, got %q: %v", token, err)
+		}
+	})
+
+	t.Run("tokens are unique", func(t *testing.T) {
+		a := MakeRefreshToken()
+		b := MakeRefreshToken()
+		if a == b {
+			t.Fatal("expected two different tokens, got the same one twice")
+		}
+	})
+}
 
 func TestGetBearerToken(t *testing.T) {
 	t.Run("valid bearer token", func(t *testing.T) {
