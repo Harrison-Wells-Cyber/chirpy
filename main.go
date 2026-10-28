@@ -17,6 +17,7 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
 	platform       string
+	jwtTokenSecret string
 }
 
 func main() {
@@ -40,6 +41,7 @@ func main() {
 		fileserverHits: atomic.Int32{},
 		dbQueries:      dbQueries,
 		platform:       os.Getenv("PLATFORM"),
+		jwtTokenSecret: os.Getenv("JWT_TOKEN_SECRET"),
 	}
 
 	mux := http.NewServeMux()
@@ -47,8 +49,11 @@ func main() {
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
-	mux.HandleFunc("POST /api/validate_chirp", handlerChirpsValidate)
+	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsList)
+	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerChirpGet)
+	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
+	mux.HandleFunc("POST /api/login", apiCfg.handlerLogin)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
