@@ -66,3 +66,44 @@ func TestGetBearerToken(t *testing.T) {
 		}
 	})
 }
+
+func TestGetAPIKey(t *testing.T) {
+	t.Run("valid api key", func(t *testing.T) {
+		headers := http.Header{}
+		headers.Set("Authorization", "ApiKey my-api-key")
+		key, err := GetAPIKey(headers)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if key != "my-api-key" {
+			t.Fatalf("expected my-api-key, got %q", key)
+		}
+	})
+
+	t.Run("extra whitespace", func(t *testing.T) {
+		headers := http.Header{}
+		headers.Set("Authorization", "ApiKey    my-api-key")
+		key, err := GetAPIKey(headers)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if key != "my-api-key" {
+			t.Fatalf("expected my-api-key, got %q", key)
+		}
+	})
+
+	t.Run("missing header", func(t *testing.T) {
+		headers := http.Header{}
+		if _, err := GetAPIKey(headers); err == nil {
+			t.Fatal("expected error for missing Authorization header, got nil")
+		}
+	})
+
+	t.Run("not an api key", func(t *testing.T) {
+		headers := http.Header{}
+		headers.Set("Authorization", "Bearer abc123")
+		if _, err := GetAPIKey(headers); err == nil {
+			t.Fatal("expected error for non-ApiKey Authorization header, got nil")
+		}
+	})
+}
